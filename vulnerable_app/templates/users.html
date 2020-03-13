@@ -1,0 +1,28 @@
+<html lang="en">
+<head>
+    <title>Mini Project 1</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+<nav class="blue lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Mini Project 1</a>
+    </div>
+</nav>
+<div class="section">
+    <h4 class="header center">All Users</h4>
+    <ul class="header center">
+        {% for user in all_users %}
+            <li class="collection-item avatar">
+                <p>---------------------------</p>
+                <p>Username: {{user.username}}</p>
+                <p>Password: {{user.password}}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+</body>
+</html>
