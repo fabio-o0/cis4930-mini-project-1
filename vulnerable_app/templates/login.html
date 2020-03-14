@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Account</title>
+    <title>Login</title>
 </head>
 <body>
 
-    <h1>Create Account</h1>
+    <h1>Login</h1>
 
     {% if message %}
         <p>{{ message }}</p>
@@ -14,12 +14,12 @@
 
     <form action="" method="post">
         <p>
-            <label for="new_username">Choose a Username</label>
-            <input type="text" name="new_username">
+            <label for="username">Username</label>
+            <input type="text" name="username">
         </p>
         <p>
-            <label for="new_password">Choose a Password</label>
-            <input type="password" name="new_password">
+            <label for="password">Password</label>
+            <input type="password" name="password">
         </p>
         <p>
             <input type="submit">
@@ -27,9 +27,10 @@
     </form>
 
     <ul>
-      <li><a href="/login/">Login</a></li>
+      <li><a href="/create_account/">Create an account</a></li>
       <li><a href="/">Go back</a></li>
     </ul>
+
 
 </body>
 </html>

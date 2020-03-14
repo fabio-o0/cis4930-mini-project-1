@@ -5,3 +5,4 @@ env_variables:
   DB_USER: root
   DB_PASS: thepasswordis1234
   DB_NAME: site
+  PEPPER: pepper
