@@ -7,7 +7,7 @@ import string
 
 import hashlib
 
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect, url_for, session, make_response
 import sqlalchemy
 
 db_user = os.environ.get("DB_USER")
@@ -16,6 +16,7 @@ db_name = os.environ.get("DB_NAME")
 cloud_sql_connection_name = os.environ.get("CLOUD_SQL_CONNECTION_NAME")
 
 app = Flask(__name__)
+app.secret_key = 'secret'
 
 logger = logging.getLogger()
 
@@ -51,7 +52,6 @@ def randomSalt():
 
 @app.before_first_request
 def create_tables():
-    # Create tables (if they don't already exist)
     with db.connect() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS users ("
@@ -65,8 +65,39 @@ def create_tables():
 def index():
     return render_template("index.html")
 
+@app.route("/dashboard/", methods=["GET", "POST"])
+def dashboard():
+    if request.cookies.get('logged_in') == 'true':
+        username = request.cookies.get('last_user')
+        return render_template("dashboard.html", user=username)
+    #MORE SECURE METHOD
+    # if 'logged_in' in session:
+    #     if session['logged_in'] == 'true':
+    #         username = session['user']
+    #         return render_template("dashboard.html", user=username)
+    return redirect(url_for('login'))
+
+@app.route('/logout/')
+def logout():
+    if request.cookies.get('logged_in') == 'true':
+        response = make_response(redirect(url_for('index')))
+        response.set_cookie('logged_in', 'false')
+        return response
+    #MORE SECURE METHOD
+    # if 'logged_in' in session:
+    #     session.pop('logged_in', None)
+    #     return redirect(url_for('index'))
+    else:
+        return "an error occurred"
+
 @app.route('/login/', methods=['post', 'get'])
 def login():
+    if request.cookies.get('logged_in') == 'true':
+        return redirect(url_for('dashboard'))
+    #MORE SECURE METHOD
+    # if 'logged_in' in session:
+    #     if session['logged_in'] == 'true':
+    #         return redirect(url_for('dashboard'))
     message = ''
     if request.method == 'POST':
         username = request.form.get('username')
@@ -90,6 +121,14 @@ def login():
 
         if hashed_s == actual_pass:
             message = "Successfully logged in"
+            response = redirect(url_for('dashboard'))
+            response.set_cookie('last_user', username)
+            response.set_cookie('logged_in', 'true')
+            return response
+            #MORE SECURE METHOD
+            # session['user'] = username
+            # session['logged_in'] = 'true'
+            # return redirect(url_for('dashboard'))
         else:
             message = "Wrong username or password"
 
