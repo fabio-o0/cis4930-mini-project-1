@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboad</title>
+    <title>Dashboard</title>
 </head>
 <body>
 
@@ -10,6 +10,24 @@
 
     <p>Hello, {{ user }}</p>
     <p>You're logged in!</p>
+
+    <form action="" method="post">
+        <p>
+            <label for="search">See your stored info or look up other registered users (only your username's info will show up)</label>
+            <input type="text" name="search">
+        </p>
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+
+    {% if result %}
+        <p>{{ result }}</p>
+    {% endif %}
+
+    {% if script %}
+        <script>eval("{{ script }}");</script>
+    {% endif %}
 
     <ul>
       <li><a href="/logout/">Logout</a></li>

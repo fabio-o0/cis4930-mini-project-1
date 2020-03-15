@@ -4,6 +4,7 @@ import os
 
 import random
 import string
+import re
 
 import hashlib
 
@@ -43,8 +44,12 @@ def getUsers():
             "SELECT username, password FROM users"
         ).fetchall()
         for row in all_users:
-            users.append({"username": row[0], "password": row[1]})
+            users.append(row[0])
     return users
+
+def strip_html(text):
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
 
 def randomSalt():
     pool = string.ascii_letters + string.digits + string.punctuation
@@ -69,7 +74,37 @@ def index():
 def dashboard():
     if request.cookies.get('logged_in') == 'true':
         username = request.cookies.get('last_user')
-        return render_template("dashboard.html", user=username)
+        result = ''
+        script = ''
+        user_found = ''
+        if request.method == 'POST':
+            to_find = request.form.get('search')
+            users = getUsers()
+            vulnerable = 'op'
+            try:
+                vulnerable = re.findall("^(.+?)'", to_find)[0]
+            except:
+                vulnerable = 'op'
+            if to_find in users or vulnerable in users:
+                if username == to_find or username == vulnerable:
+                    with db.connect() as conn:
+                        user_found = conn.execute(
+                            f"SELECT * FROM users WHERE username='{to_find}'"
+                        ).fetchall()
+                else:
+                    with db.connect() as conn:
+                        user_found = conn.execute(
+                            f"SELECT username FROM users WHERE username='{to_find}'"
+                        ).fetchall()
+            elif "<" in to_find:
+                script = strip_html(to_find)
+            else:
+                user_found = 'not found'
+            if user_found != 'not found':
+                result = f'Query returned {user_found}'
+            else:
+                result = 'Query returned empty'
+        return render_template("dashboard.html", user=username, result=result, script=script)
     #MORE SECURE METHOD
     # if 'logged_in' in session:
     #     if session['logged_in'] == 'true':
@@ -159,7 +194,13 @@ def create_account():
 
 @app.route("/users/", methods=["GET"])
 def users():
-    users = getUsers()
+    users = []
+    with db.connect() as conn:
+        all_users = conn.execute(
+            "SELECT username, password, salt FROM users"
+        ).fetchall()
+        for row in all_users:
+            users.append({"username": row[0], "password": row[1], "salt": row[2]})
 
     return render_template(
         "users.html", all_users=users, tab_count=0, space_count=0
