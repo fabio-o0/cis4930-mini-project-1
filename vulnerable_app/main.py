@@ -70,10 +70,13 @@ def create_tables():
 def index():
     return render_template("index.html")
 
-@app.route("/dashboard/", methods=["GET", "POST"])
-def dashboard():
+@app.route("/dashboard/<user>", methods=["GET", "POST"])
+def dashboard(user):
     if request.cookies.get('logged_in') == 'true':
-        username = request.cookies.get('last_user')
+        if user != '':
+            username = user
+        else:
+            username = request.cookies.get('last_user')
         result = ''
         script = ''
         user_found = ''
@@ -128,7 +131,7 @@ def logout():
 @app.route('/login/', methods=['post', 'get'])
 def login():
     if request.cookies.get('logged_in') == 'true':
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('dashboard', user = request.cookies.get('last_user')))
     #MORE SECURE METHOD
     # if 'logged_in' in session:
     #     if session['logged_in'] == 'true':
@@ -156,7 +159,7 @@ def login():
 
         if hashed_s == actual_pass:
             message = "Successfully logged in"
-            response = redirect(url_for('dashboard'))
+            response = redirect(url_for('dashboard', user = username))
             response.set_cookie('last_user', username)
             response.set_cookie('logged_in', 'true')
             return response
