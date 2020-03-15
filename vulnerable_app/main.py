@@ -67,7 +67,6 @@ def index():
 
 @app.route('/login/', methods=['post', 'get'])
 def login():
-    users = getUsers()
     message = ''
     if request.method == 'POST':
         username = request.form.get('username')
