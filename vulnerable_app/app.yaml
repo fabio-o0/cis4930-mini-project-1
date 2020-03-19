@@ -1,7 +1,7 @@
 runtime: python37
 
 env_variables:
-  CLOUD_SQL_CONNECTION_NAME: cis4930-mini-project-1:us-central1:site-db
+  CLOUD_SQL_CONNECTION_NAME: tribal-ethos-270721:us-east1:cis-4930
   DB_USER: root
   DB_PASS: thepasswordis1234
   DB_NAME: site

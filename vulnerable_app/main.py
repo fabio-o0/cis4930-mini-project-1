@@ -72,24 +72,19 @@ def index():
 
 @app.route("/dashboard/<user>", methods=["GET", "POST"])
 def dashboard(user):
-    if request.cookies.get('logged_in') == 'true':
-        if user != '':
-            username = user
-        else:
-            username = request.cookies.get('last_user')
+    #MORE SECURE METHOD
+
+    if session['logged_in'] == 'true':
+        username = session['user']
         result = ''
         script = ''
         user_found = ''
         if request.method == 'POST':
             to_find = request.form.get('search')
             users = getUsers()
-            vulnerable = 'op'
-            try:
-                vulnerable = re.findall("^(.+?)'", to_find)[0]
-            except:
-                vulnerable = 'op'
-            if to_find in users or vulnerable in users:
-                if username == to_find or username == vulnerable:
+
+            if to_find in users:
+                if username == to_find:
                     with db.connect() as conn:
                         user_found = conn.execute(
                             f"SELECT * FROM users WHERE username='{to_find}'"
@@ -108,34 +103,25 @@ def dashboard(user):
             else:
                 result = 'Query returned empty'
         return render_template("dashboard.html", user=username, result=result, script=script)
-    #MORE SECURE METHOD
-    # if 'logged_in' in session:
-    #     if session['logged_in'] == 'true':
-    #         username = session['user']
-    #         return render_template("dashboard.html", user=username)
     return redirect(url_for('login'))
 
 @app.route('/logout/')
 def logout():
-    if request.cookies.get('logged_in') == 'true':
-        response = make_response(redirect(url_for('index')))
-        response.set_cookie('logged_in', 'false')
-        return response
+
     #MORE SECURE METHOD
-    # if 'logged_in' in session:
-    #     session.pop('logged_in', None)
-    #     return redirect(url_for('index'))
+    if 'logged_in' in session:
+        session.pop('logged_in', None)
+        return redirect(url_for('index'))
     else:
         return "an error occurred"
 
 @app.route('/login/', methods=['post', 'get'])
 def login():
-    if request.cookies.get('logged_in') == 'true':
-        return redirect(url_for('dashboard', user = request.cookies.get('last_user')))
+    
     #MORE SECURE METHOD
-    # if 'logged_in' in session:
-    #     if session['logged_in'] == 'true':
-    #         return redirect(url_for('dashboard'))
+    if 'logged_in' in session:
+        if session['logged_in'] == 'true':
+            return redirect(url_for('dashboard', user = session['user']))
     message = ''
     if request.method == 'POST':
         username = request.form.get('username')
@@ -159,14 +145,10 @@ def login():
 
         if hashed_s == actual_pass:
             message = "Successfully logged in"
-            response = redirect(url_for('dashboard', user = username))
-            response.set_cookie('last_user', username)
-            response.set_cookie('logged_in', 'true')
-            return response
             #MORE SECURE METHOD
-            # session['user'] = username
-            # session['logged_in'] = 'true'
-            # return redirect(url_for('dashboard'))
+            session['user'] = username
+            session['logged_in'] = 'true'
+            return redirect(url_for('dashboard', user = username))
         else:
             message = "Wrong username or password"
 
